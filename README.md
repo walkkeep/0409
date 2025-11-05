@@ -35,9 +35,11 @@ curl -L https://raw.githubusercontent.com/hykazrf/0409/main/iproyal.sh -o iproya
 ```
 
 # 保活代码，
+# chrome
 ```
-bash <(wget -qO- https://raw.githubusercontent.com/hykazrf/0409/main/alive.sh)
+bash <(wget -qO- https://raw.githubusercontent.com/walkkeep/0409/main/alive.sh)
 ```
+
 ```
 bash <(wget -qO- https://raw.githubusercontent.com/hykazrf/0409/main/xintiao)
 ```
