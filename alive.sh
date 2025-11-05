@@ -50,21 +50,24 @@ mkdir -p ~/firefox-data
 
 # 运行 Firefox 容器
 echo -e "${YELLOW}正在启动 Firefox 容器...${RESET}"
-docker rm -f firefox 2>/dev/null || true
+docker rm -f chrome 2>/dev/null || true
 docker run -d \
-  --name firefox \
-  -p 5800:5800 \
-  -v ~/firefox-data:/config:rw \
-  -e FF_OPEN_URL=https://cloudstudio.net/ \
-  -e TZ=Asia/Shanghai \
-  -e LANG=zh_CN.UTF-8 \
-  -e ENABLE_CJK_FONT=1 \
+  --name=chrome \
+  -e PUID=1000 \
+  -e PGID=1000 \
+  -e TZ=Etc/UTC \
+  -e CHROME_CLI=https://outlook.live.com/ `#optional` \
+  -p 3000:3000 \
+  -p 3001:3001 \
+  -v /path/to/config:/config \
+  --shm-size="1gb" \
   --restart unless-stopped \
-  jlesage/firefox
+  lscr.io/linuxserver/chrome:latest
+
 
 # 检查容器是否成功启动
-if ! docker ps | grep -q firefox; then
-  echo -e "${RED}错误: Firefox 容器启动失败，请检查 Docker 是否正常运行${RESET}"
+if ! docker ps | grep -q chrome; then
+  echo -e "${RED}错误: chrome 容器启动失败，请检查 Docker 是否正常运行${RESET}"
   exit 1
 fi
 
@@ -83,8 +86,8 @@ while nc -z localhost $NGROK_API_PORT 2>/dev/null; do
 done
 
 # 使用 nohup 在后台运行 ngrok
-pkill -f "ngrok http 5800 --name firefox" >/dev/null 2>&1 || true
-nohup /usr/local/bin/ngrok http 5800 --name firefox --authtoken=${NGROK_TOKEN} >/dev/null 2>&1 &
+pkill -f "ngrok http 3000 --name firefox" >/dev/null 2>&1 || true
+nohup /usr/local/bin/ngrok http 3000 --name chrome --authtoken=${NGROK_TOKEN} >/dev/null 2>&1 &
 
 echo -e "${YELLOW}[4/4] 等待 Ngrok 服务启动...${RESET}"
 sleep 5
@@ -97,10 +100,10 @@ NGROK_URL=$(echo $NGROK_INFO | grep -o '"public_url":"[^"]*"' | grep -o 'https:/
 
 echo -e "${GREEN}===== 设置完成 =====${RESET}"
 echo ""
-echo -e "${GREEN}Firefox 本地访问地址: ${RESET}http://localhost:5800"
-echo -e "${GREEN}Firefox Ngrok 访问地址: ${RESET}$NGROK_URL"
+echo -e "${GREEN}chrome 本地访问地址: ${RESET}http://localhost:3000"
+echo -e "${GREEN}chrome Ngrok 访问地址: ${RESET}$NGROK_URL"
 echo ""
 echo -e "${YELLOW}注意: Docker 容器设置为自动重启，除非手动停止${RESET}"
-echo -e "${YELLOW}注意: Ngrok 进程在后台运行，如需停止请使用 'pkill -f \"ngrok http 5800 --name firefox\"' 命令${RESET}"
+echo -e "${YELLOW}注意: Ngrok 进程在后台运行，如需停止请使用 'pkill -f \"ngrok http 3000 --name chrome\"' 命令${RESET}"
 echo -e "${YELLOW}注意: 这是一个 IDX 保活方案，请确保定期访问以保持活跃状态${RESET}"
 echo ""
